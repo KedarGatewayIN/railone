@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="railone_primary">#0B63E5</color>
+    <color name="railone_primary_dark">#1A4E8A</color>
+    <color name="railone_primary_deep">#003366</color>
+    <color name="railone_accent_orange">#F26522</color>
+    <color name="railone_surface_bg">#F5F7FA</color>
+    <color name="railone_active_green">#1E8E3E</color>
+    <color name="railone_active_green_bg">#E6F4EA</color>
+    <color name="railone_warning_red">#D32F2F</color>
+    <color name="railone_warning_red_bg">#FFF0F2</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>
