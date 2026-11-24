@@ -102,8 +102,8 @@ fun DigitalTicketScreen(
         }
     }
 
-    // Dynamic countdown timer (starts around 03:46 as in the screenshot and ticks down each second)
-    var countdownSeconds by remember { mutableIntStateOf(226) } // 3m 46s
+    // Dynamic countdown timer (starts from 5:00 mins as in official RailOne app and ticks down each second)
+    var countdownSeconds by remember { mutableIntStateOf(300) } // 5m 00s (300 seconds)
 
     LaunchedEffect(Unit) {
         while (countdownSeconds > 0) {
@@ -387,6 +387,28 @@ fun DigitalTicketScreen(
                         )
                     }
 
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // "Book Connecting Journey" Pill Button matching screenshot
+                    OutlinedButton(
+                        onClick = onBack,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(46.dp),
+                        shape = RoundedCornerShape(23.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFC7DEFF)),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = Color.White,
+                            contentColor = RailOneBlue
+                        )
+                    ) {
+                        Text(
+                            text = "Book Connecting Journey",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+
                     Spacer(modifier = Modifier.height(20.dp))
 
                     // Authentic Scannable QR Code
@@ -396,7 +418,7 @@ fun DigitalTicketScreen(
                     ) {
                         QrCodeView(
                             content = ticket.qrPayload,
-                            modifier = Modifier.size(210.dp)
+                            modifier = Modifier.size(220.dp)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
@@ -424,13 +446,13 @@ fun DigitalTicketScreen(
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = "IR recovers only 57% of cost of travel on an average.",
+                            text = "IR recovers only 57% of cost of travel on an average",
                             fontSize = 11.sp,
                             color = TextSecondary
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = "This ticket is booked on a personal user ID. It's sale/purchase is an offence u/s 143 of the Railways Act, 1989.",
+                            text = "This ticket is booked on a personal user ID. It's sale/purchase is an offence u/s 143 of the Railways Act, 1989",
                             fontSize = 11.sp,
                             color = TextSecondary
                         )
@@ -445,7 +467,7 @@ fun DigitalTicketScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // Action Buttons
+                    // Action Button: "Go to My Bookings"
                     Button(
                         onClick = onGoToMyBookings,
                         modifier = Modifier
@@ -457,24 +479,6 @@ fun DigitalTicketScreen(
                         Text(
                             text = "Go to My Bookings",
                             fontSize = 15.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    OutlinedButton(
-                        onClick = onBack,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp),
-                        shape = RoundedCornerShape(24.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, RailOneBlue),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = RailOneBlue)
-                    ) {
-                        Text(
-                            text = "Book Connecting Journey",
-                            fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold
                         )
                     }

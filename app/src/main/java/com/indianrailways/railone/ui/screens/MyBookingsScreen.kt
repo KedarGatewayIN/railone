@@ -22,7 +22,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ConfirmationNumber
@@ -30,6 +29,9 @@ import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Train
 import androidx.compose.material.icons.outlined.ConfirmationNumber
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,10 +39,12 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -69,6 +73,8 @@ import com.indianrailways.railone.ui.theme.RailOneActiveGreenBg
 import com.indianrailways.railone.ui.theme.RailOneBlue
 import com.indianrailways.railone.ui.theme.RailOneOrange
 import com.indianrailways.railone.ui.theme.RailOneSurface
+import com.indianrailways.railone.ui.theme.RailOneWarningRed
+import com.indianrailways.railone.ui.theme.RailOneWarningRedBg
 import com.indianrailways.railone.ui.theme.TextMuted
 import com.indianrailways.railone.ui.theme.TextPrimary
 import com.indianrailways.railone.ui.theme.TextSecondary
@@ -91,6 +97,7 @@ fun MyBookingsScreen(
 ) {
     var selectedTab by remember { mutableStateOf(BookingTab.UPCOMING) }
     var selectedFilterChip by remember { mutableStateOf("All") } // All | Unreserved | Reserved | Platform
+    var ticketToCancel by remember { mutableStateOf<UnreservedTicket?>(null) }
 
     val unreservedTickets by ticketRepository.unreservedTickets.collectAsState()
     val reservedTickets by ticketRepository.reservedTickets.collectAsState()
@@ -99,7 +106,45 @@ fun MyBookingsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    val totalUpcomingCount = unreservedTickets.size + reservedTickets.size
+    // 1. DYNAMIC FILTERING BY TAB (Upcoming/Active vs Completed vs Cancelled vs All)
+    val tabFilteredUnreserved = remember(unreservedTickets, selectedTab) {
+        when (selectedTab) {
+            BookingTab.UPCOMING -> unreservedTickets.filter { it.status == TicketStatus.ACTIVE }
+            BookingTab.COMPLETED -> unreservedTickets.filter { it.status == TicketStatus.COMPLETED }
+            BookingTab.CANCELLED -> unreservedTickets.filter { it.status == TicketStatus.CANCELLED }
+            BookingTab.ALL -> unreservedTickets
+        }
+    }
+
+    val tabFilteredReserved = remember(reservedTickets, selectedTab) {
+        when (selectedTab) {
+            BookingTab.UPCOMING -> reservedTickets.filter { it.status == TicketStatus.ACTIVE }
+            BookingTab.COMPLETED -> reservedTickets.filter { it.status == TicketStatus.COMPLETED }
+            BookingTab.CANCELLED -> reservedTickets.filter { it.status == TicketStatus.CANCELLED }
+            BookingTab.ALL -> reservedTickets
+        }
+    }
+
+    val tabFilteredPlatform = remember(platformTickets, selectedTab) {
+        when (selectedTab) {
+            BookingTab.UPCOMING -> platformTickets.filter { it.status == TicketStatus.ACTIVE }
+            BookingTab.COMPLETED -> platformTickets.filter { it.status == TicketStatus.COMPLETED }
+            BookingTab.CANCELLED -> platformTickets.filter { it.status == TicketStatus.CANCELLED }
+            BookingTab.ALL -> platformTickets
+        }
+    }
+
+    // 2. DYNAMIC FILTERING BY CHIP (All vs Unreserved vs Reserved vs Platform)
+    val displayUnreserved = (selectedFilterChip == "All" || selectedFilterChip == "Unreserved")
+    val displayReserved = (selectedFilterChip == "All" || selectedFilterChip == "Reserved")
+    val displayPlatform = (selectedFilterChip == "All" || selectedFilterChip == "Platform")
+
+    val visibleUnreserved = if (displayUnreserved) tabFilteredUnreserved else emptyList()
+    val visibleReserved = if (displayReserved) tabFilteredReserved else emptyList()
+    val visiblePlatform = if (displayPlatform) tabFilteredPlatform else emptyList()
+
+    val currentTabCount = visibleUnreserved.size + visibleReserved.size + visiblePlatform.size
+    val isEmpty = currentTabCount == 0
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -107,8 +152,7 @@ fun MyBookingsScreen(
                 .fillMaxSize()
                 .background(RailOneSurface)
         ) {
-            // 1. Blue Top Bar matching screenshot:
-            // Back arrow | "My Bookings" | Sort/Filter icon
+            // 1. Top Header Bar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -154,7 +198,7 @@ fun MyBookingsScreen(
                 }
             }
 
-            // 2. Subheader matching screenshot: "Upcoming (4)" in orange + refresh icon
+            // 2. Dynamic Subheader: "Upcoming (N)" / "Completed (N)" in orange + refresh icon
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -164,7 +208,7 @@ fun MyBookingsScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "${selectedTab.title} ($totalUpcomingCount)",
+                    text = "${selectedTab.title} ($currentTabCount)",
                     color = RailOneOrange,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold
@@ -173,7 +217,7 @@ fun MyBookingsScreen(
                 IconButton(
                     onClick = {
                         scope.launch {
-                            snackbarHostState.showSnackbar("Bookings refreshed with IRCTC Sync")
+                            snackbarHostState.showSnackbar("Synchronized with IRCTC & UTS Servers")
                         }
                     },
                     modifier = Modifier.size(28.dp)
@@ -187,7 +231,7 @@ fun MyBookingsScreen(
                 }
             }
 
-            // 3. Filter Chips: All | Unreserved | Reserved
+            // 3. Filter Chips: All | Unreserved | Reserved | Platform
             LazyRow(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -223,33 +267,91 @@ fun MyBookingsScreen(
                 }
             }
 
-            // 4. Ticket List
-            LazyColumn(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                // Newly booked unreserved tickets appear at top
-                if (selectedFilterChip == "All" || selectedFilterChip == "Unreserved") {
-                    items(unreservedTickets) { unreserved ->
+            // 4. Ticket List (or Authentic Empty State)
+            if (isEmpty) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .padding(24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(28.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFFEEF4FF)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Train,
+                                    contentDescription = "Empty",
+                                    tint = RailOneBlue,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(14.dp))
+                            Text(
+                                text = "No ${selectedTab.title} Bookings",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = "Tickets booked for ${selectedTab.title.lowercase()} journeys will appear here automatically.",
+                                fontSize = 12.sp,
+                                color = TextSecondary,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(18.dp))
+                            Button(
+                                onClick = onBookAgain,
+                                shape = RoundedCornerShape(20.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = RailOneBlue)
+                            ) {
+                                Text("Book Ticket Now", fontSize = 13.sp)
+                            }
+                        }
+                    }
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    // Unreserved Tickets
+                    items(visibleUnreserved, key = { it.utsNumber }) { unreserved ->
                         UnreservedTicketCard(
                             ticket = unreserved,
                             onViewDetails = { onViewUnreservedTicket(unreserved.utsNumber) },
-                            onBookAgain = onBookAgain
+                            onBookAgain = onBookAgain,
+                            onCancel = { ticketToCancel = unreserved }
                         )
                     }
-                }
 
-                // Realistic pre-populated reserved tickets from screenshot
-                if (selectedFilterChip == "All" || selectedFilterChip == "Reserved") {
-                    items(reservedTickets) { reserved ->
+                    // Reserved Tickets
+                    items(visibleReserved, key = { it.pnr }) { reserved ->
                         ReservedTicketCard(
                             ticket = reserved,
                             onViewDetails = {
                                 scope.launch {
-                                    snackbarHostState.showSnackbar("PNR ${reserved.pnr} confirmed in Coach ${reserved.coach}, Berth ${reserved.berth}")
+                                    snackbarHostState.showSnackbar("PNR ${reserved.pnr} Status: Confirmed in ${reserved.coach}-${reserved.berth}")
                                 }
                             },
                             onBookAgain = onBookAgain
@@ -258,8 +360,7 @@ fun MyBookingsScreen(
                 }
             }
 
-            // 5. Floating / Bottom Pill Filter Tabs matching screenshot:
-            // Upcoming | Completed | Cancelled | All
+            // 5. Floating Bottom Pill Tabs: Upcoming | Completed | Cancelled | All
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -311,6 +412,54 @@ fun MyBookingsScreen(
             }
         }
 
+        // Cancellation Confirmation Dialog
+        ticketToCancel?.let { ticket ->
+            AlertDialog(
+                onDismissRequest = { ticketToCancel = null },
+                title = {
+                    Text(
+                        text = "Cancel Ticket?",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                },
+                text = {
+                    Column {
+                        Text(
+                            text = "Are you sure you want to cancel UTS Ticket ${ticket.utsNumber} (${ticket.sourceStation.code} → ${ticket.destStation.code})?",
+                            fontSize = 14.sp,
+                            color = TextPrimary
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "As per Indian Railways UTS refund guidelines, full refund of ${ticket.formattedFare} will be credited back to your Rail Wallet.",
+                            fontSize = 12.sp,
+                            color = TextSecondary
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            ticketRepository.cancelUnreservedTicket(ticket.utsNumber)
+                            ticketToCancel = null
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Ticket ${ticket.utsNumber} cancelled. Refund credited to Rail Wallet.")
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = RailOneWarningRed)
+                    ) {
+                        Text("Confirm Cancel")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { ticketToCancel = null }) {
+                        Text("Keep Ticket")
+                    }
+                }
+            )
+        }
+
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier
@@ -324,13 +473,21 @@ fun MyBookingsScreen(
 fun UnreservedTicketCard(
     ticket: UnreservedTicket,
     onViewDetails: () -> Unit,
-    onBookAgain: () -> Unit
+    onBookAgain: () -> Unit,
+    onCancel: () -> Unit = {}
 ) {
+    val isCancelled = ticket.status == TicketStatus.CANCELLED
+    val isCompleted = ticket.status == TicketStatus.COMPLETED
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clip(TicketCardShape(notchPositionFraction = 0.72f))
-            .border(1.dp, Color(0xFFF9A825).copy(alpha = 0.6f), TicketCardShape(notchPositionFraction = 0.72f))
+            .border(
+                1.dp,
+                if (isCancelled) Color(0xFFE0E0E0) else Color(0xFFF9A825).copy(alpha = 0.6f),
+                TicketCardShape(notchPositionFraction = 0.72f)
+            )
             .clickable { onViewDetails() },
         shape = TicketCardShape(notchPositionFraction = 0.72f),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -343,7 +500,7 @@ fun UnreservedTicketCard(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 14.dp)
             ) {
-                // Top Row: Unreserved Badge | UTS Number
+                // Top Row: Status Badge | UTS Number
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -351,11 +508,23 @@ fun UnreservedTicketCard(
                 ) {
                     Surface(
                         shape = RoundedCornerShape(8.dp),
-                        color = RailOneActiveGreenBg
+                        color = when {
+                            isCancelled -> RailOneWarningRedBg
+                            isCompleted -> Color(0xFFF1F3F6)
+                            else -> RailOneActiveGreenBg
+                        }
                     ) {
                         Text(
-                            text = "● ACTIVE",
-                            color = RailOneActiveGreen,
+                            text = when {
+                                isCancelled -> "● CANCELLED"
+                                isCompleted -> "COMPLETED"
+                                else -> "● ACTIVE"
+                            },
+                            color = when {
+                                isCancelled -> RailOneWarningRed
+                                isCompleted -> TextSecondary
+                                else -> RailOneActiveGreen
+                            },
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
@@ -392,7 +561,7 @@ fun UnreservedTicketCard(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Route: FROM ---------- duration / distance ----------> TO
+                // Route: FROM ---------- distance ----------> TO
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -449,7 +618,7 @@ fun UnreservedTicketCard(
                 modifier = Modifier.padding(horizontal = 14.dp)
             )
 
-            // Bottom Action Bar: Book Again | View Details
+            // Bottom Action Bar: Fare | Book Again | View Details | Cancel
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -464,7 +633,21 @@ fun UnreservedTicketCard(
                     color = RailOneOrange
                 )
 
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (ticket.status == TicketStatus.ACTIVE) {
+                        Text(
+                            text = "Cancel",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = RailOneWarningRed,
+                            modifier = Modifier.clickable { onCancel() }
+                        )
+                        Text(text = "|", fontSize = 12.sp, color = Color(0xFFD0D7DE))
+                    }
+
                     Text(
                         text = "Book Again",
                         fontSize = 13.sp,
@@ -472,11 +655,7 @@ fun UnreservedTicketCard(
                         color = RailOneBlue,
                         modifier = Modifier.clickable { onBookAgain() }
                     )
-                    Text(
-                        text = "|",
-                        fontSize = 13.sp,
-                        color = Color(0xFFD0D7DE)
-                    )
+                    Text(text = "|", fontSize = 13.sp, color = Color(0xFFD0D7DE))
                     Text(
                         text = "View Details",
                         fontSize = 13.sp,
@@ -601,8 +780,7 @@ fun ReservedTicketCard(
                 modifier = Modifier.padding(horizontal = 14.dp)
             )
 
-            // Bottom Action Bar matching screenshot:
-            // Book Again | View Details
+            // Bottom Action Bar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

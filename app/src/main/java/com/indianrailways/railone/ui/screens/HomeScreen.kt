@@ -1,5 +1,6 @@
 package com.indianrailways.railone.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -31,6 +32,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Train
 import androidx.compose.material.icons.outlined.ConfirmationNumber
+import androidx.compose.material.icons.outlined.RateReview
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -55,15 +57,20 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.indianrailways.railone.R
+import com.indianrailways.railone.data.model.TicketStatus
 import com.indianrailways.railone.data.model.UnreservedTicket
 import com.indianrailways.railone.data.repository.TicketRepository
 import com.indianrailways.railone.ui.components.JourneyCardType
 import com.indianrailways.railone.ui.components.JourneyPlannerCard
+import com.indianrailways.railone.ui.components.RailOneLogo
 import com.indianrailways.railone.ui.navigation.Screen
 import com.indianrailways.railone.ui.theme.RailOneBlue
 import com.indianrailways.railone.ui.theme.RailOneBlueDeep
@@ -95,7 +102,8 @@ data class ServiceOffering(
 data class RailwayFact(
     val title: String,
     val description: String,
-    val badge: String
+    val badge: String,
+    val imageRes: Int? = null
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -105,7 +113,7 @@ fun HomeScreen(
     onNavigate: (String) -> Unit
 ) {
     val unreservedTickets by ticketRepository.unreservedTickets.collectAsState()
-    val latestTicket = unreservedTickets.firstOrNull()
+    val latestTicket = unreservedTickets.find { it.status == TicketStatus.ACTIVE } ?: unreservedTickets.firstOrNull()
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -128,17 +136,20 @@ fun HomeScreen(
             RailwayFact(
                 title = "Historical Milestone",
                 description = "First ever passenger train was run between Bori Bandar to Thane on April 16, 1853.",
-                badge = "1853"
+                badge = "1853",
+                imageRes = R.drawable.img_trivia_1853
             ),
             RailwayFact(
                 title = "Engineering Marvel",
                 description = "Chenab Railway Bridge in Dharot, Jammu & Kashmir is the World's highest Railway Bridge.",
-                badge = "Record"
+                badge = "Record",
+                imageRes = R.drawable.img_trivia_bridge
             ),
             RailwayFact(
-                title = "Vande Bharat Express",
-                description = "India's indigenous semi-high speed train set connecting major cities at up to 160 km/h.",
-                badge = "Make in India"
+                title = "World Record",
+                description = "World's longest railway platform is at Hubballi Jn, Karnataka, stretching 1,507 meters.",
+                badge = "Platform",
+                imageRes = R.drawable.img_trivia_bridge
             )
         )
     }
@@ -181,21 +192,8 @@ fun HomeScreen(
                         )
                     }
 
-                    // Center: RailOne Logo
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "Rail",
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Light,
-                            color = TextPrimary
-                        )
-                        Text(
-                            text = "One",
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextPrimary
-                        )
-                    }
+                    // Center: Authentic RailOne Logo with signature orange dot
+                    RailOneLogo()
 
                     // Right: Notification Bell with Badge "2"
                     BadgedBox(
@@ -398,65 +396,38 @@ fun HomeScreen(
 
                     LazyRow(
                         contentPadding = PaddingValues(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
                         items(facts) { fact ->
-                            Card(
+                            Column(
                                 modifier = Modifier
-                                    .width(260.dp)
-                                    .height(160.dp),
-                                shape = RoundedCornerShape(16.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color.White),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                                    .width(180.dp)
                             ) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(14.dp),
-                                    verticalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
+                                if (fact.imageRes != null) {
+                                    Card(
+                                        shape = RoundedCornerShape(14.dp),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(115.dp)
                                     ) {
-                                        Text(
-                                            text = fact.title,
-                                            fontSize = 13.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = RailOneBlue
-                                        )
-                                        Surface(
-                                            color = Color(0xFFF1F3F4),
-                                            shape = RoundedCornerShape(8.dp)
-                                        ) {
-                                            Text(
-                                                text = fact.badge,
-                                                fontSize = 10.sp,
-                                                fontWeight = FontWeight.SemiBold,
-                                                color = TextSecondary,
-                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                            )
-                                        }
-                                    }
-                                    Text(
-                                        text = fact.description,
-                                        fontSize = 12.sp,
-                                        color = TextPrimary,
-                                        lineHeight = 18.sp,
-                                        maxLines = 4,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = "Indian Railways Heritage",
-                                            fontSize = 11.sp,
-                                            color = TextMuted
+                                        Image(
+                                            painter = painterResource(id = fact.imageRes),
+                                            contentDescription = fact.title,
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier.fillMaxSize()
                                         )
                                     }
                                 }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = fact.description,
+                                    fontSize = 12.sp,
+                                    color = RailOneBlueDeep,
+                                    lineHeight = 16.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    maxLines = 4,
+                                    overflow = TextOverflow.Ellipsis
+                                )
                             }
                         }
                     }
@@ -576,13 +547,30 @@ fun UpcomingTicketCard(
                 .fillMaxWidth()
                 .background(
                     brush = Brush.horizontalGradient(
-                        colors = listOf(TicketPurpleStart, TicketPurpleEnd)
+                        colors = listOf(Color(0xFF512DA8), Color(0xFF7E57C2))
                     )
                 )
                 .padding(16.dp)
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                // Top row: Stations
+                // Top row: Journey Date matching screenshot
+                Text(
+                    text = ticket.formattedBookingDateTime.substringBefore(","),
+                    color = Color.White.copy(alpha = 0.85f),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(Color.White.copy(alpha = 0.2f))
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Route: Stations
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -594,11 +582,10 @@ fun UpcomingTicketCard(
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold
                     )
-                    Icon(
-                        imageVector = Icons.Default.ArrowForward,
-                        contentDescription = "to",
-                        tint = Color.White.copy(alpha = 0.8f),
-                        modifier = Modifier.size(16.dp)
+                    Text(
+                        text = "----------------",
+                        color = Color.White.copy(alpha = 0.4f),
+                        fontSize = 11.sp
                     )
                     Text(
                         text = ticket.destStation.name,
@@ -608,7 +595,7 @@ fun UpcomingTicketCard(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
                 // Bottom row: Tag + Action Buttons
                 Row(
@@ -619,7 +606,7 @@ fun UpcomingTicketCard(
                     Text(
                         text = "Unreserved",
                         color = Color(0xFF80D8FF),
-                        fontSize = 14.sp,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold
                     )
 
