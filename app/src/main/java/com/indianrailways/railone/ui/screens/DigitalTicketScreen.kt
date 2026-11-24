@@ -589,9 +589,6 @@ fun DigitalTicketScreen(
                 }
             }
         }
-                }
-            }
-        }
     }
 }
 
