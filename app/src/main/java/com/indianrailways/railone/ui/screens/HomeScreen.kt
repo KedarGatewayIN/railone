@@ -159,7 +159,7 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(RailOneSurface),
-            contentPadding = PaddingValues(bottom = 16.dp)
+            contentPadding = PaddingValues(bottom = 84.dp)
         ) {
             // 1. Top Bar matching screenshot: Language icon | RailOne logo | Notification bell with badge "2"
             item {

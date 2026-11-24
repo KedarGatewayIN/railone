@@ -44,6 +44,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
@@ -135,13 +137,13 @@ fun DigitalTicketScreen(
         contentPadding = PaddingValues(bottom = 24.dp)
     ) {
         // 1. Blue Header Bar matching screenshot:
-        // Left back button | Title: "Booking Details" | Subtitle: "Thank You, Kedar Mitesh Vyas, Happy Journey!"
+        // Left back button | Title: "Booking Details" | Subtitle: "Mobile: 7227981091"
         item {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(RailOneBlue)
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .padding(horizontal = 14.dp, vertical = 12.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -160,114 +162,196 @@ fun DigitalTicketScreen(
                         )
                     }
 
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(14.dp))
 
                     Column {
                         Text(
                             text = "Booking Details",
-                            fontSize = 18.sp,
+                            fontSize = 19.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
+                        Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = "Thank You, ${ticket.passengerName}, Happy Journey!",
-                            fontSize = 12.sp,
-                            color = Color.White.copy(alpha = 0.9f)
+                            text = "Mobile: 7227981091",
+                            fontSize = 12.5.sp,
+                            color = Color.White.copy(alpha = 0.95f),
+                            fontWeight = FontWeight.Medium
                         )
                     }
                 }
             }
         }
 
-        // 2. Black Animated Dynamic Preview Card matching screenshot
+        // 2. Light Grey "Thank You Kedar Mitesh Vyas, Happy Journey !" Banner Strip
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFFF1F3F6))
+                    .padding(vertical = 8.dp, horizontal = 16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Thank You Kedar Mitesh Vyas, Happy Journey !",
+                    fontSize = 12.5.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color(0xFF455A64),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+
+        // 3. Black Dynamic Security Card with Diamond Watermark Pattern
         item {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                shape = RoundedCornerShape(14.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E2229)),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    .padding(horizontal = 14.dp, vertical = 8.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF14171D)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
             ) {
-                Column(
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 14.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .drawBehind {
+                            val step = 28.dp.toPx()
+                            val lineColor = Color.White.copy(alpha = 0.04f)
+                            val strokeWidth = 1.dp.toPx()
+                            var x = -size.height
+                            while (x < size.width + size.height) {
+                                drawLine(
+                                    color = lineColor,
+                                    start = Offset(x, 0f),
+                                    end = Offset(x + size.height, size.height),
+                                    strokeWidth = strokeWidth
+                                )
+                                x += step
+                            }
+                            x = 0f
+                            while (x < size.width + size.height) {
+                                drawLine(
+                                    color = lineColor,
+                                    start = Offset(x, 0f),
+                                    end = Offset(x - size.height, size.height),
+                                    strokeWidth = strokeWidth
+                                )
+                                x += step
+                            }
+                        }
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
                 ) {
-                    // "INDIAN RAILWAYS / भारतीय रेल"
-                    Text(
-                        text = "INDIAN RAILWAYS",
-                        color = Color.White,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = "भारतीय रेल",
-                        color = Color.White.copy(alpha = 0.85f),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        // Top: Dashed line | भारतीय रेल | Dashed line
+                        DashedDivider(color = Color(0xFF37474F))
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = "भारतीय रेल",
+                            color = Color.White,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        DashedDivider(color = Color(0xFF37474F))
 
-                    Spacer(modifier = Modifier.height(10.dp))
-                    DashedDivider(color = Color(0xFF424750))
-                    Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
-                    // Dynamic Countdown Timer
-                    Text(
-                        text = "Dynamic preview will close in",
-                        color = Color.White.copy(alpha = 0.9f),
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Normal
-                    )
+                        // Dynamic preview will close in
+                        Text(
+                            text = "Dynamic preview will close in",
+                            color = Color.White.copy(alpha = 0.9f),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Normal
+                        )
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
 
-                    Text(
-                        text = formattedTimer,
-                        color = Color(0xFFFF5252),
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontFamily = FontFamily.Monospace,
-                        letterSpacing = 2.sp
-                    )
+                        // Large Glowing Red Digital Timer matching screenshot
+                        Text(
+                            text = formattedTimer,
+                            color = Color(0xFFFF1744),
+                            fontSize = 38.sp,
+                            fontWeight = FontWeight.Black,
+                            fontFamily = FontFamily.Monospace,
+                            letterSpacing = 3.sp
+                        )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                    Text(
-                        text = "Ticket Booking Date & Time: ${ticket.formattedBookingDateTime}",
-                        color = Color(0xFFFFCC80),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                        // Ticket Booking Date & Time
+                        Text(
+                            text = "Ticket Booking Date & Time",
+                            color = Color.White.copy(alpha = 0.85f),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Normal
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = ticket.formattedBookingDateTime,
+                            color = Color(0xFFFFA000), // Glowing warm amber
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold
+                        )
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
 
-                    Text(
-                        text = "Ticket is Non-Transferable",
-                        color = Color.White.copy(alpha = 0.7f),
-                        fontSize = 11.sp
-                    )
+                        // Reference code R19265
+                        Text(
+                            text = "R19265",
+                            color = Color.White.copy(alpha = 0.6f),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium,
+                            letterSpacing = 1.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        // Ticket is Non-Transferable
+                        Text(
+                            text = "Ticket is Non-Transferable",
+                            color = Color.White.copy(alpha = 0.8f),
+                            fontSize = 11.5.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        // Bottom: Dashed line | INDIAN RAILWAYS | Dashed line
+                        DashedDivider(color = Color(0xFF37474F))
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = "INDIAN RAILWAYS",
+                            color = Color.White,
+                            fontSize = 12.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        DashedDivider(color = Color(0xFF37474F))
+                    }
                 }
             }
         }
 
-        // 3. Ticket Details Main Body Card matching screenshot
+        // 4. Ticket Details Main Body Card matching screenshot
         item {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(16.dp),
+                    .padding(horizontal = 14.dp, vertical = 6.dp),
+                shape = RoundedCornerShape(14.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF80DEEA)),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(18.dp)
+                        .padding(16.dp)
                 ) {
                     // Header Row: "Journey Ticket" on left | "● ACTIVE" pill on right
                     Row(
@@ -275,12 +359,22 @@ fun DigitalTicketScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = if (ticket.ticketType.name == "RETURN") "Return Ticket" else "Journey Ticket",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextPrimary
-                        )
+                        Column {
+                            Text(
+                                text = if (ticket.ticketType.name == "RETURN") "Return Ticket" else "Journey Ticket",
+                                fontSize = 11.sp,
+                                color = Color(0xFF78909C)
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = ticket.utsNumber,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = TextPrimary,
+                                fontFamily = FontFamily.Monospace,
+                                letterSpacing = 1.sp
+                            )
+                        }
 
                         Surface(
                             shape = RoundedCornerShape(12.dp),
@@ -296,21 +390,9 @@ fun DigitalTicketScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // UTS Number in large bold clean typography
-                    Text(
-                        text = ticket.utsNumber,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = RailOneBlueDeep,
-                        fontFamily = FontFamily.Monospace,
-                        letterSpacing = 1.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
                     DashedDivider(color = Color(0xFFE5E9F0))
-                    Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     // 2-Column Grid matching screenshot
                     Row(modifier = Modifier.fillMaxWidth()) {
@@ -337,53 +419,74 @@ fun DigitalTicketScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(14.dp))
-                    DashedDivider(color = Color(0xFFE5E9F0))
                     Spacer(modifier = Modifier.height(12.dp))
+                    DashedDivider(color = Color(0xFFE5E9F0))
+                    Spacer(modifier = Modifier.height(10.dp))
 
-                    // Via & IR Registration Code
+                    // Via & IR Registration Code with Share icon
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Share,
+                                contentDescription = "Share",
+                                tint = Color(0xFF546E7A),
+                                modifier = Modifier.size(15.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Via: ${ticket.via}",
+                                fontSize = 12.sp,
+                                color = Color(0xFF546E7A)
+                            )
+                        }
+
                         Text(
-                            text = "Via: ${ticket.via}",
-                            fontSize = 12.sp,
-                            color = TextSecondary
-                        )
-                        Text(
-                            text = ticket.irRegistrationCode,
+                            text = "IR:24AAAGM0289C1ZP",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium,
-                            color = TextMuted
+                            color = Color(0xFF546E7A),
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Validity Notice matching screenshot (cyan box)
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = Color(0xFFE0F7FA),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFB2EBF2)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "*Valid for start of journey within 3 hour or until departure of the first train",
+                            color = Color(0xFF00838F),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium,
+                            lineHeight = 15.sp,
+                            modifier = Modifier.padding(10.dp)
                         )
                     }
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    // Validity Notice
-                    Text(
-                        text = "*Valid for start of journey within 3 hour or until departure of the first train",
-                        fontSize = 11.sp,
-                        color = RailOneBlue,
-                        fontWeight = FontWeight.Medium,
-                        lineHeight = 15.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
                     // Red Warning Callout Box matching screenshot
                     Surface(
-                        shape = RoundedCornerShape(10.dp),
+                        shape = RoundedCornerShape(8.dp),
                         color = RailOneWarningRedBg,
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFFCDD2))
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFFCDD2)),
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
                             text = "Note: This ticket is non refundable. Ticket is stored locally on the device. Please do not change your handset or perform factory reset.",
                             color = RailOneWarningRed,
                             fontSize = 11.sp,
-                            lineHeight = 16.sp,
-                            modifier = Modifier.padding(12.dp)
+                            lineHeight = 15.sp,
+                            modifier = Modifier.padding(10.dp)
                         )
                     }
 
@@ -394,9 +497,9 @@ fun DigitalTicketScreen(
                         onClick = onBack,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(46.dp),
-                        shape = RoundedCornerShape(23.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFC7DEFF)),
+                            .height(44.dp),
+                        shape = RoundedCornerShape(22.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF90CAF9)),
                         colors = ButtonDefaults.outlinedButtonColors(
                             containerColor = Color.White,
                             contentColor = RailOneBlue
@@ -404,12 +507,12 @@ fun DigitalTicketScreen(
                     ) {
                         Text(
                             text = "Book Connecting Journey",
-                            fontSize = 14.sp,
+                            fontSize = 13.5.sp,
                             fontWeight = FontWeight.SemiBold
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(18.dp))
 
                     // Authentic Scannable QR Code
                     Column(
@@ -428,7 +531,7 @@ fun DigitalTicketScreen(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(18.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     // "Do you know?" info box matching screenshot
                     Column(
@@ -444,7 +547,7 @@ fun DigitalTicketScreen(
                             fontWeight = FontWeight.Bold,
                             color = TextPrimary
                         )
-                        Spacer(modifier = Modifier.height(2.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "IR recovers only 57% of cost of travel on an average",
                             fontSize = 11.sp,
@@ -465,7 +568,7 @@ fun DigitalTicketScreen(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(18.dp))
 
                     // Action Button: "Go to My Bookings"
                     Button(
@@ -479,9 +582,13 @@ fun DigitalTicketScreen(
                         Text(
                             text = "Go to My Bookings",
                             fontSize = 15.sp,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White
                         )
                     }
+                }
+            }
+        }
                 }
             }
         }
