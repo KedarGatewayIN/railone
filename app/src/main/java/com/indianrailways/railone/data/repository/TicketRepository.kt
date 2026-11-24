@@ -43,132 +43,14 @@ class TicketRepository(context: Context) {
             val type = object : TypeToken<MutableList<UnreservedTicket>>() {}.type
             gson.fromJson(unreservedJson, type) ?: mutableListOf()
         } else {
-            // Seed initial realistic unreserved tickets: 1 Active, 1 Completed, 1 Cancelled
-            val bh = StationRepository.getStationByCode("BH") ?: StationRepository.majorStations[0]
-            val brc = StationRepository.getStationByCode("BRC") ?: StationRepository.majorStations[1]
-            val st = StationRepository.getStationByCode("ST") ?: StationRepository.majorStations[3]
-            val adi = StationRepository.getStationByCode("ADI") ?: StationRepository.majorStations[2]
-
-            val activeTicket = UnreservedTicket(
-                utsNumber = "X509EIA0BF",
-                sourceStation = bh,
-                destStation = brc,
-                via = "--------",
-                ticketType = TicketType.JOURNEY,
-                trainType = TrainType.SUPERFAST,
-                travelClass = "SECOND",
-                adultCount = 1,
-                childCount = 0,
-                distanceKm = 71,
-                fare = 60.0,
-                bookingTimestamp = System.currentTimeMillis() - 1000 * 60 * 12,
-                status = TicketStatus.ACTIVE
-            )
-
-            val completedTicket = UnreservedTicket(
-                utsNumber = "C381KQZ7XA",
-                sourceStation = st,
-                destStation = bh,
-                via = "--------",
-                ticketType = TicketType.JOURNEY,
-                trainType = TrainType.MAIL_EXPRESS,
-                travelClass = "SECOND",
-                adultCount = 1,
-                childCount = 0,
-                distanceKm = 59,
-                fare = 45.0,
-                bookingTimestamp = System.currentTimeMillis() - 1000 * 60 * 60 * 24 * 3, // 3 days ago
-                status = TicketStatus.COMPLETED
-            )
-
-            val cancelledTicket = UnreservedTicket(
-                utsNumber = "R821MOP91B",
-                sourceStation = adi,
-                destStation = brc,
-                via = "--------",
-                ticketType = TicketType.JOURNEY,
-                trainType = TrainType.SUPERFAST,
-                travelClass = "SECOND",
-                adultCount = 1,
-                childCount = 0,
-                distanceKm = 100,
-                fare = 65.0,
-                bookingTimestamp = System.currentTimeMillis() - 1000 * 60 * 60 * 24 * 7, // 7 days ago
-                status = TicketStatus.CANCELLED
-            )
-
-            mutableListOf(activeTicket, completedTicket, cancelledTicket)
+            mutableListOf()
         }
 
         val reserved: MutableList<ReservedTicket> = if (!reservedJson.isNullOrEmpty()) {
             val type = object : TypeToken<MutableList<ReservedTicket>>() {}.type
             gson.fromJson(reservedJson, type) ?: mutableListOf()
         } else {
-            val jbp = StationRepository.getStationByCode("JBP") ?: StationRepository.majorStations[16]
-            val bh = StationRepository.getStationByCode("BH") ?: StationRepository.majorStations[0]
-            val gda = StationRepository.getStationByCode("GDA") ?: StationRepository.majorStations[17]
-            val indb = StationRepository.getStationByCode("INDB") ?: StationRepository.majorStations[18]
-            val knw = StationRepository.getStationByCode("KNW") ?: StationRepository.majorStations[19]
-            val mmct = StationRepository.getStationByCode("MMCT") ?: StationRepository.majorStations[4]
-            val ndls = StationRepository.getStationByCode("NDLS") ?: StationRepository.majorStations[6]
-
-            mutableListOf(
-                ReservedTicket(
-                    pnr = "8756232802",
-                    trainNumber = "20906",
-                    trainName = "EKNR MAHAMANA",
-                    sourceStation = jbp,
-                    destStation = bh,
-                    journeyDate = "Sun, 17 Jan 27",
-                    travelDuration = "14h:15m",
-                    status = TicketStatus.ACTIVE,
-                    fare = 1420.0
-                ),
-                ReservedTicket(
-                    pnr = "3003321393",
-                    trainNumber = "19309",
-                    trainName = "SHANTI EXPRESS",
-                    sourceStation = gda,
-                    destStation = indb,
-                    journeyDate = "Wed, 13 Jan 27",
-                    travelDuration = "7h:10m",
-                    status = TicketStatus.ACTIVE,
-                    fare = 780.0
-                ),
-                ReservedTicket(
-                    pnr = "8256233956",
-                    trainNumber = "12188",
-                    trainName = "JBP GARIB RATH",
-                    sourceStation = knw,
-                    destStation = jbp,
-                    journeyDate = "Thu, 14 Jan 27",
-                    travelDuration = "6h:30m",
-                    status = TicketStatus.ACTIVE,
-                    fare = 910.0
-                ),
-                ReservedTicket(
-                    pnr = "2648194012",
-                    trainNumber = "12951",
-                    trainName = "MUMBAI TEJAS RAJDHANI",
-                    sourceStation = mmct,
-                    destStation = ndls,
-                    journeyDate = "Sat, 09 Jan 27",
-                    travelDuration = "15h:32m",
-                    status = TicketStatus.COMPLETED,
-                    fare = 2850.0
-                ),
-                ReservedTicket(
-                    pnr = "4193820194",
-                    trainNumber = "12009",
-                    trainName = "SHATABDI EXPRESS",
-                    sourceStation = mmct,
-                    destStation = bh,
-                    journeyDate = "Tue, 05 Jan 27",
-                    travelDuration = "4h:48m",
-                    status = TicketStatus.CANCELLED,
-                    fare = 1120.0
-                )
-            )
+            mutableListOf()
         }
 
         val platform: MutableList<PlatformTicket> = if (!platformJson.isNullOrEmpty()) {
@@ -181,10 +63,6 @@ class TicketRepository(context: Context) {
         _unreservedTickets.value = unreserved
         _reservedTickets.value = reserved
         _platformTickets.value = platform
-
-        persistUnreserved()
-        persistReserved()
-        persistPlatform()
     }
 
     private fun persistUnreserved() {
