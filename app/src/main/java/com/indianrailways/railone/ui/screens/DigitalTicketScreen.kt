@@ -57,6 +57,7 @@ import com.indianrailways.railone.ui.components.QrCodeView
 import com.indianrailways.railone.ui.theme.RailOneActiveGreen
 import com.indianrailways.railone.ui.theme.RailOneActiveGreenBg
 import com.indianrailways.railone.ui.theme.RailOneBlue
+import com.indianrailways.railone.ui.theme.RailOneBlueDeep
 import com.indianrailways.railone.ui.theme.RailOneOrange
 import com.indianrailways.railone.ui.theme.RailOneSurface
 import com.indianrailways.railone.ui.theme.RailOneWarningRed
