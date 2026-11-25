@@ -29,6 +29,7 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun RailOneTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    lightStatusBar: Boolean = false,
     content: @Composable () -> Unit
 ) {
     // RailOne official app uses crisp, vibrant white/light design
@@ -39,8 +40,7 @@ fun RailOneTheme(
         SideEffect {
             val window = (view.context as? Activity)?.window
             if (window != null) {
-                window.statusBarColor = RailOneBlue.toArgb()
-                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = lightStatusBar
             }
         }
     }

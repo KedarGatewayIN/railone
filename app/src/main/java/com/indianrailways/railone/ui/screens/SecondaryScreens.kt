@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -85,6 +86,7 @@ fun SimpleTopBar(title: String, onBack: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .background(RailOneBlue)
+            .statusBarsPadding()
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -498,6 +500,7 @@ fun MenuScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(RailOneBlue)
+                .statusBarsPadding()
                 .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -514,17 +517,19 @@ fun MenuScreen(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             val menuItems = listOf(
-                Pair("UTS Unreserved Ticketing", "Book paperless local & express tickets"),
-                Pair("IRCTC Train Reservation", "Reserve sleeper, 3AC, 2AC, and Vande Bharat"),
-                Pair("Platform Ticket Booking", "Instant platform entry token"),
-                Pair("National Train Enquiry System (NTES)", "Live train delay and platform updates"),
-                Pair("Integrated Railway Helpline (139)", "24x7 all-India passenger assistance"),
-                Pair("Rail Madad App", "Grievance, security and medical emergency")
+                Triple("UTS Unreserved Ticketing", "Book paperless local & express tickets", com.indianrailways.railone.ui.navigation.Screen.UnreservedBooking.route),
+                Triple("IRCTC Train Reservation", "Reserve sleeper, 3AC, 2AC, and Vande Bharat", com.indianrailways.railone.ui.navigation.Screen.ReservedBooking.route),
+                Triple("Platform Ticket Booking", "Instant platform entry token", com.indianrailways.railone.ui.navigation.Screen.PlatformBooking.route),
+                Triple("National Train Enquiry System (NTES)", "Live train delay and platform updates", com.indianrailways.railone.ui.navigation.Screen.LiveTrainStatus.route),
+                Triple("PNR Enquiry", "Check current PNR confirmation & coach status", com.indianrailways.railone.ui.navigation.Screen.PnrStatus.route),
+                Triple("Rail Madad App", "Grievance, security and medical emergency", com.indianrailways.railone.ui.navigation.Screen.RailMadad.route)
             )
 
-            items(menuItems) { (title, subtitle) ->
+            items(menuItems) { (title, subtitle, route) ->
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onNavigate(route) },
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White)
                 ) {

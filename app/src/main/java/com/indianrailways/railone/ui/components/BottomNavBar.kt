@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
@@ -56,7 +57,7 @@ fun RailOneBottomNavBar(
         NavItem(
             title = "My Bookings",
             route = Screen.MyBookings.route,
-            selectedIcon = Icons.Outlined.ConfirmationNumber,
+            selectedIcon = Icons.Filled.ConfirmationNumber,
             unselectedIcon = Icons.Outlined.ConfirmationNumber
         ),
         NavItem(
@@ -78,8 +79,8 @@ fun RailOneBottomNavBar(
             .fillMaxWidth()
             .background(RailOneBlue)
             .navigationBarsPadding()
-            .height(64.dp)
-            .padding(horizontal = 8.dp),
+            .height(62.dp)
+            .padding(horizontal = 6.dp),
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -105,13 +106,13 @@ fun RailOneBottomNavBar(
                     imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
                     contentDescription = item.title,
                     tint = contentColor,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(23.dp)
                 )
                 Spacer(modifier = Modifier.height(3.dp))
                 Text(
                     text = item.title,
                     color = contentColor,
-                    fontSize = 12.sp,
+                    fontSize = 11.5.sp,
                     fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
                 )
             }

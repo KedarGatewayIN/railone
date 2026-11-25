@@ -11,12 +11,12 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 
 /**
- * Custom Ticket Shape with rounded outer corners and side semi-circle cutouts (notches).
+ * Ticket card shape with rounded outer corners and inward left/right semi-circle notches.
  */
 class TicketCardShape(
     private val cornerRadius: Dp = 16.dp,
-    private val notchRadius: Dp = 12.dp,
-    private val notchPositionFraction: Float = 0.72f // Height ratio where the notch appears
+    private val notchRadius: Dp = 11.dp,
+    private val notchPositionFraction: Float = 0.72f
 ) : Shape {
     override fun createOutline(
         size: Size,
@@ -29,7 +29,6 @@ class TicketCardShape(
 
         val path = Path().apply {
             reset()
-            // Top-left corner
             moveTo(0f, cornerRadiusPx)
             arcTo(
                 rect = Rect(0f, 0f, 2 * cornerRadiusPx, 2 * cornerRadiusPx),
@@ -37,18 +36,14 @@ class TicketCardShape(
                 sweepAngleDegrees = 90f,
                 forceMoveTo = false
             )
-            // Top edge
             lineTo(size.width - cornerRadiusPx, 0f)
-            // Top-right corner
             arcTo(
                 rect = Rect(size.width - 2 * cornerRadiusPx, 0f, size.width, 2 * cornerRadiusPx),
                 startAngleDegrees = 270f,
                 sweepAngleDegrees = 90f,
                 forceMoveTo = false
             )
-            // Right edge down to notch
             lineTo(size.width, notchCenterY - notchRadiusPx)
-            // Right notch cutout (inward semi-circle)
             arcTo(
                 rect = Rect(
                     size.width - notchRadiusPx,
@@ -60,27 +55,21 @@ class TicketCardShape(
                 sweepAngleDegrees = -180f,
                 forceMoveTo = false
             )
-            // Right edge down to bottom corner
             lineTo(size.width, size.height - cornerRadiusPx)
-            // Bottom-right corner
             arcTo(
                 rect = Rect(size.width - 2 * cornerRadiusPx, size.height - 2 * cornerRadiusPx, size.width, size.height),
                 startAngleDegrees = 0f,
                 sweepAngleDegrees = 90f,
                 forceMoveTo = false
             )
-            // Bottom edge
             lineTo(cornerRadiusPx, size.height)
-            // Bottom-left corner
             arcTo(
                 rect = Rect(0f, size.height - 2 * cornerRadiusPx, 2 * cornerRadiusPx, size.height),
                 startAngleDegrees = 90f,
                 sweepAngleDegrees = 90f,
                 forceMoveTo = false
             )
-            // Left edge up to notch
             lineTo(0f, notchCenterY + notchRadiusPx)
-            // Left notch cutout (inward semi-circle)
             arcTo(
                 rect = Rect(
                     -notchRadiusPx,
@@ -92,7 +81,53 @@ class TicketCardShape(
                 sweepAngleDegrees = -180f,
                 forceMoveTo = false
             )
-            // Left edge back to top corner
+            close()
+        }
+
+        return Outline.Generic(path)
+    }
+}
+
+/**
+ * Horizontal Upcoming Journey ticket card shape with top and bottom semi-circle notches
+ * matching the official RailOne Home Screen Upcoming Journey widget.
+ */
+class UpcomingTicketShape(
+    private val cornerRadius: Dp = 18.dp,
+    private val notchRadius: Dp = 9.dp,
+    private val notchXFraction: Float = 0.72f
+) : Shape {
+    override fun createOutline(
+        size: Size,
+        layoutDirection: LayoutDirection,
+        density: Density
+    ): Outline {
+        val r = with(density) { cornerRadius.toPx() }
+        val nr = with(density) { notchRadius.toPx() }
+        val nx = size.width * notchXFraction
+
+        val path = Path().apply {
+            reset()
+            // Top-left corner
+            moveTo(0f, r)
+            arcTo(Rect(0f, 0f, 2 * r, 2 * r), 180f, 90f, false)
+            // Top edge to top notch
+            lineTo(nx - nr, 0f)
+            // Top inward semi-circle notch
+            arcTo(Rect(nx - nr, -nr, nx + nr, nr), 180f, -180f, false)
+            // Top edge to top-right corner
+            lineTo(size.width - r, 0f)
+            arcTo(Rect(size.width - 2 * r, 0f, size.width, 2 * r), 270f, 90f, false)
+            // Right edge to bottom-right corner
+            lineTo(size.width, size.height - r)
+            arcTo(Rect(size.width - 2 * r, size.height - 2 * r, size.width, size.height), 0f, 90f, false)
+            // Bottom edge to bottom notch
+            lineTo(nx + nr, size.height)
+            // Bottom inward semi-circle notch
+            arcTo(Rect(nx - nr, size.height - nr, nx + nr, size.height + nr), 0f, -180f, false)
+            // Bottom edge to bottom-left corner
+            lineTo(r, size.height)
+            arcTo(Rect(0f, size.height - 2 * r, 2 * r, size.height), 90f, 90f, false)
             close()
         }
 

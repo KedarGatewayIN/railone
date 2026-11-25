@@ -38,19 +38,23 @@ jobs:
           fi
           chmod +x gradlew
 
+      - name: Run Unit Tests
+        run: ./gradlew testDebugUnitTest --stacktrace
+
       - name: Build Debug APK with Gradle
         run: ./gradlew assembleDebug --stacktrace
 
-      - name: Verify APK Generated
+      - name: Prepare Direct RailOne.apk
         run: |
-          echo "Listing generated APKs:"
-          ls -lh app/build/outputs/apk/debug/
+          mkdir -p release-apk
+          cp app/build/outputs/apk/debug/*.apk release-apk/RailOne.apk
+          ls -lh release-apk/
 
       - name: Upload APK as Artifact
         uses: actions/upload-artifact@v4
         with:
           name: RailOne-Debug-APK
-          path: app/build/outputs/apk/debug/*.apk
+          path: release-apk/RailOne.apk
           retention-days: 30
           if-no-files-found: error
 
@@ -67,7 +71,7 @@ jobs:
         with:
           tag_name: latest-build
           name: "RailOne APK - Latest Build"
-          files: app/build/outputs/apk/debug/*.apk
+          files: release-apk/RailOne.apk
           draft: false
           prerelease: false
           body: |

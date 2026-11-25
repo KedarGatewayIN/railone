@@ -55,4 +55,27 @@ class RailOneUnitTest {
         assertEquals("20906", status.trainNumber)
         assertTrue(status.stations.isNotEmpty())
     }
+
+    @Test
+    fun testFareCalculation_ReturnAndMailExp() {
+        val distance = StationRepository.getDistanceKm("BH", "BRC")
+        val returnOrdinary = FareCalculator.calculateFare(
+            distanceKm = distance,
+            trainType = TrainType.ORDINARY,
+            ticketType = TicketType.RETURN,
+            adults = 2,
+            children = 1
+        )
+        // Base ordinary for 71km is 25.0; child is ceil(12.5/5)*5 = 15.0; one-way = 25*2 + 15 = 65; return = 130.0
+        assertEquals(130.0, returnOrdinary, 0.01)
+    }
+
+    @Test
+    fun testReservedTrainSearch() {
+        val bh = StationRepository.getStationByCode("BH")!!
+        val brc = StationRepository.getStationByCode("BRC")!!
+        val trains = MockRailwayService.searchTrainsBetweenStations(bh, brc)
+        assertTrue(trains.isNotEmpty())
+        assertTrue(trains.all { it.classes.isNotEmpty() })
+    }
 }

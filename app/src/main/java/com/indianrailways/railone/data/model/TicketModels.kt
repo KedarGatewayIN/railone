@@ -9,10 +9,10 @@ enum class TicketType(val label: String) {
     RETURN("RETURN")
 }
 
-enum class TrainType(val label: String) {
-    ORDINARY("ORDINARY"),
-    MAIL_EXPRESS("MAIL/EXPRESS"),
-    SUPERFAST("SUPERFAST")
+enum class TrainType(val label: String, val shortLabel: String) {
+    ORDINARY("ORDINARY", "ORDINARY"),
+    MAIL_EXPRESS("MAIL/EXP", "MAIL/EXP"),
+    SUPERFAST("SUPERFAST", "SUPERFAST")
 }
 
 enum class TicketStatus(val label: String) {
@@ -25,7 +25,7 @@ data class UnreservedTicket(
     val utsNumber: String,
     val sourceStation: Station,
     val destStation: Station,
-    val via: String = "--------",
+    val via: String = "------",
     val ticketType: TicketType = TicketType.JOURNEY,
     val trainType: TrainType = TrainType.SUPERFAST,
     val travelClass: String = "SECOND",
@@ -37,9 +37,12 @@ data class UnreservedTicket(
     val validityHours: Int = 3,
     val status: TicketStatus = TicketStatus.ACTIVE,
     val irRegistrationCode: String = "IR:24AAAGM0289C1ZP",
+    val rCode: String = "R19265",
     val passengerName: String = "Kedar Mitesh Vyas",
     val passengerMobile: String = "7227981091",
-    val isPaperless: Boolean = true
+    val isPaperless: Boolean = true,
+    val bookingMode: String = "Normal",
+    val locationMode: String = "Outside Station"
 ) {
     val formattedBookingDateTime: String
         get() {
@@ -56,6 +59,9 @@ data class UnreservedTicket(
     val formattedFare: String
         get() = String.format(Locale.ENGLISH, "₹%.2f", fare)
 
+    val formattedFareWhole: String
+        get() = String.format(Locale.ENGLISH, "₹ %.0f", fare)
+
     val passengerSummary: String
         get() = "$adultCount Adult, $childCount Child"
 
@@ -63,7 +69,7 @@ data class UnreservedTicket(
      * Authentic QR payload representing the encoded digital security token
      */
     val qrPayload: String
-        get() = "UTS:$utsNumber|SRC:${sourceStation.code}|DST:${destStation.code}|KM:$distanceKm|FARE:$fare|DT:$bookingTimestamp|IR:$irRegistrationCode|PAX:$adultCount+$childCount|CLS:$travelClass|TRN:$trainType"
+        get() = "UTS:$utsNumber|SRC:${sourceStation.code}|DST:${destStation.code}|KM:$distanceKm|FARE:$fare|DT:$bookingTimestamp|IR:$irRegistrationCode|PAX:$adultCount+$childCount|CLS:$travelClass|TRN:${trainType.label}"
 }
 
 data class ReservedTicket(
@@ -81,7 +87,9 @@ data class ReservedTicket(
     val travelClass: String = "3A",
     val status: TicketStatus = TicketStatus.ACTIVE,
     val fare: Double = 1240.0,
-    val passengerName: String = "Kedar Mitesh Vyas"
+    val passengerName: String = "Kedar Mitesh Vyas",
+    val passengerCount: Int = 1,
+    val bookingTimestamp: Long = System.currentTimeMillis()
 ) {
     val formattedFare: String
         get() = String.format(Locale.ENGLISH, "₹%.2f", fare)
@@ -105,4 +113,18 @@ data class PlatformTicket(
 
     val formattedFare: String
         get() = String.format(Locale.ENGLISH, "₹%.2f", fare)
+}
+
+data class AppNotification(
+    val id: String,
+    val title: String,
+    val message: String,
+    val timestamp: Long = System.currentTimeMillis(),
+    val isRead: Boolean = false
+) {
+    val formattedTime: String
+        get() {
+            val sdf = SimpleDateFormat("EEE, dd MMM yyyy HH:mm", Locale.ENGLISH)
+            return sdf.format(Date(timestamp))
+        }
 }

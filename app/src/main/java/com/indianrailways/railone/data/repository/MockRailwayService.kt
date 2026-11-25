@@ -45,7 +45,74 @@ data class StationHalt(
     val isDeparted: Boolean
 )
 
+data class SearchTrainItem(
+    val trainNumber: String,
+    val trainName: String,
+    val trainType: String,
+    val departureTime: String,
+    val arrivalTime: String,
+    val duration: String,
+    val runDays: String,
+    val classes: List<Pair<String, Double>>, // Class code to Fare
+    val availability: String
+)
+
 object MockRailwayService {
+
+    fun searchTrainsBetweenStations(from: Station, to: Station): List<SearchTrainItem> {
+        val distance = StationRepository.getDistanceKm(from.code, to.code)
+        val slFare = (140 + (distance * 0.55).toInt() / 10 * 10).toDouble()
+        val ac3Fare = (490 + (distance * 1.45).toInt() / 10 * 10).toDouble()
+        val ac2Fare = (740 + (distance * 2.15).toInt() / 10 * 10).toDouble()
+        val ccFare = (320 + (distance * 1.25).toInt() / 10 * 10).toDouble()
+
+        return listOf(
+            SearchTrainItem(
+                trainNumber = "20906",
+                trainName = "EKNR MAHAMANA SF",
+                trainType = "SUPERFAST",
+                departureTime = "06:15",
+                arrivalTime = "07:22",
+                duration = "01h 07m",
+                runDays = "Daily",
+                classes = listOf("2S" to 75.0, "SL" to slFare, "3A" to ac3Fare, "2A" to ac2Fare),
+                availability = "AVL 42"
+            ),
+            SearchTrainItem(
+                trainNumber = "12933",
+                trainName = "KARNAVATI EXPRESS",
+                trainType = "SUPERFAST",
+                departureTime = "09:42",
+                arrivalTime = "10:40",
+                duration = "00h 58m",
+                runDays = "Daily",
+                classes = listOf("2S" to 75.0, "CC" to ccFare, "EC" to ac2Fare),
+                availability = "AVL 18"
+            ),
+            SearchTrainItem(
+                trainNumber = "19015",
+                trainName = "SAURASHTRA EXP",
+                trainType = "MAIL/EXP",
+                departureTime = "14:20",
+                arrivalTime = "15:48",
+                duration = "01h 28m",
+                runDays = "Daily",
+                classes = listOf("SL" to slFare, "3A" to ac3Fare, "2A" to ac2Fare),
+                availability = "AVL 64"
+            ),
+            SearchTrainItem(
+                trainNumber = "20902",
+                trainName = "VANDE BHARAT EXP",
+                trainType = "VANDE BHARAT",
+                departureTime = "17:55",
+                arrivalTime = "18:38",
+                duration = "00h 43m",
+                runDays = "Except Wed",
+                classes = listOf("CC" to ccFare + 120, "EC" to ac2Fare + 280),
+                availability = "AVL 11"
+            )
+        )
+    }
 
     fun checkPnrStatus(pnr: String): PnrResult {
         val cleanPnr = if (pnr.length >= 10) pnr.take(10) else "8756232802"
