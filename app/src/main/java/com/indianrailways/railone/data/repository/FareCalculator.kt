@@ -16,11 +16,12 @@ object FareCalculator {
     ): Double {
         if (adults <= 0 && children <= 0) return 0.0
 
-        // Base 2nd Class Ordinary slab
+        // Base 2nd Class Ordinary slab (calibrated so 71km BH-BRC matches official ₹45 Mail/Exp & ₹60 SF)
         val baseOrdinaryFare: Double = when {
             distanceKm <= 20 -> 10.0
             distanceKm <= 45 -> 15.0
-            distanceKm <= 75 -> 25.0
+            distanceKm <= 60 -> 25.0
+            distanceKm <= 80 -> 30.0
             distanceKm <= 110 -> 35.0
             distanceKm <= 160 -> 45.0
             distanceKm <= 220 -> 60.0

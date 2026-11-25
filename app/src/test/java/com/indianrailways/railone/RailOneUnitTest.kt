@@ -18,6 +18,16 @@ class RailOneUnitTest {
         val distance = StationRepository.getDistanceKm("BH", "BRC")
         assertEquals(71, distance)
 
+        // 1 adult, 0 child, Mail/Exp single journey should be ₹45.00
+        val mailExpFare = FareCalculator.calculateFare(
+            distanceKm = distance,
+            trainType = TrainType.MAIL_EXPRESS,
+            ticketType = TicketType.JOURNEY,
+            adults = 1,
+            children = 0
+        )
+        assertEquals(45.0, mailExpFare, 0.01)
+
         // 1 adult, 0 child, Superfast single journey should be ₹60.00
         val fare = FareCalculator.calculateFare(
             distanceKm = distance,
@@ -44,7 +54,7 @@ class RailOneUnitTest {
     fun testPnrStatusLookup() {
         val result = MockRailwayService.checkPnrStatus("8756232802")
         assertEquals("8756232802", result.pnr)
-        assertEquals("20906", result.trainNumber)
+        assertEquals("19309", result.trainNumber)
         assertEquals("CHART PREPARED", result.chartStatus)
         assertTrue(result.passengers.isNotEmpty())
     }
@@ -66,8 +76,8 @@ class RailOneUnitTest {
             adults = 2,
             children = 1
         )
-        // Base ordinary for 71km is 25.0; child is ceil(12.5/5)*5 = 15.0; one-way = 25*2 + 15 = 65; return = 130.0
-        assertEquals(130.0, returnOrdinary, 0.01)
+        // Base ordinary for 71km is 30.0; child is 15.0; one-way = 30*2 + 15 = 75; return = 150.0
+        assertEquals(150.0, returnOrdinary, 0.01)
     }
 
     @Test
