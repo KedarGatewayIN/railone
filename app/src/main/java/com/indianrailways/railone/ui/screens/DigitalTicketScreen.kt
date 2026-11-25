@@ -56,6 +56,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.indianrailways.railone.data.model.TicketStatus
@@ -640,15 +641,8 @@ private fun VerticalDashedLine(
  * so it never clips inside narrow vertical side strips.
  */
 private fun Modifier.verticalRotate(degrees: Float): Modifier = this
-    .layout { measurable, constraints ->
-        val placeable = measurable.measure(
-            constraints.copy(
-                minWidth = 0,
-                maxWidth = Int.MAX_VALUE,
-                minHeight = 0,
-                maxHeight = Int.MAX_VALUE
-            )
-        )
+    .layout { measurable, _ ->
+        val placeable = measurable.measure(Constraints())
         layout(placeable.height, placeable.width) {
             placeable.place(
                 x = -(placeable.width - placeable.height) / 2,

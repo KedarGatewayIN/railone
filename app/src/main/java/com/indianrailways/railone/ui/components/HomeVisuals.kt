@@ -169,9 +169,9 @@ fun RailOneTrainOutlineLogo(
         // Outer bullet-train nose contour
         val nose = Path().apply {
             moveTo(w * 0.14f, h * 0.36f)
-            quadraticTo(w * 0.56f, h * 0.12f, w * 0.78f, h * 0.24f)
-            quadraticTo(w * 0.90f, h * 0.33f, w * 0.88f, h * 0.64f)
-            quadraticTo(w * 0.85f, h * 0.78f, w * 0.66f, h * 0.76f)
+            quadraticBezierTo(w * 0.56f, h * 0.12f, w * 0.78f, h * 0.24f)
+            quadraticBezierTo(w * 0.90f, h * 0.33f, w * 0.88f, h * 0.64f)
+            quadraticBezierTo(w * 0.85f, h * 0.78f, w * 0.66f, h * 0.76f)
             lineTo(w * 0.26f, h * 0.72f)
             close()
         }
@@ -180,7 +180,7 @@ fun RailOneTrainOutlineLogo(
         // Windshield curve
         val glass = Path().apply {
             moveTo(w * 0.50f, h * 0.28f)
-            quadraticTo(w * 0.72f, h * 0.42f, w * 0.68f, h * 0.67f)
+            quadraticBezierTo(w * 0.72f, h * 0.42f, w * 0.68f, h * 0.67f)
         }
         drawPath(glass, color = strokeColor, style = stroke)
 

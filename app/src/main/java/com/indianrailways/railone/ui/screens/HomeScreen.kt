@@ -22,12 +22,12 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AltRoute
 import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material.icons.filled.DirectionsRailway
 import androidx.compose.material.icons.filled.Fastfood
 import androidx.compose.material.icons.filled.Handshake
 import androidx.compose.material.icons.filled.ReceiptLong
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Train
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -114,7 +114,7 @@ fun HomeScreen(
 
     val offerings = remember {
         listOf(
-            ServiceOffering("Search\nTrains", Icons.Default.AltRoute, Color(0xFFE91E63), ServicePink, Screen.ReservedBooking.route),
+            ServiceOffering("Search\nTrains", Icons.Default.Search, Color(0xFFE91E63), ServicePink, Screen.ReservedBooking.route),
             ServiceOffering("PNR\nStatus", Icons.Default.ConfirmationNumber, Color(0xFF388E3C), ServiceGreen, Screen.PnrStatus.route),
             ServiceOffering("Coach\nPosition", Icons.Default.DirectionsRailway, Color(0xFF0277BD), ServiceBlue, Screen.CoachPosition.route),
             ServiceOffering("Track Your\nTrain", Icons.Default.Train, Color(0xFFF5A623), ServiceAmber, Screen.LiveTrainStatus.route),
