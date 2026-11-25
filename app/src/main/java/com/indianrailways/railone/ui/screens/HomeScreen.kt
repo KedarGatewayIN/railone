@@ -22,18 +22,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Fastfood
 import androidx.compose.material.icons.filled.Handshake
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.RailwayAlert
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Train
 import androidx.compose.material.icons.outlined.ConfirmationNumber
-import androidx.compose.material.icons.outlined.RateReview
-import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
@@ -43,7 +39,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -87,8 +82,6 @@ import com.indianrailways.railone.ui.theme.ServiceWaves
 import com.indianrailways.railone.ui.theme.TextMuted
 import com.indianrailways.railone.ui.theme.TextPrimary
 import com.indianrailways.railone.ui.theme.TextSecondary
-import com.indianrailways.railone.ui.theme.TicketPurpleEnd
-import com.indianrailways.railone.ui.theme.TicketPurpleStart
 import kotlinx.coroutines.launch
 
 data class ServiceOffering(
@@ -161,7 +154,7 @@ fun HomeScreen(
                 .background(RailOneSurface),
             contentPadding = PaddingValues(bottom = 84.dp)
         ) {
-            // 1. Top Bar matching screenshot: Language icon | RailOne logo | Notification bell with badge "2"
+            // 1. Top Bar: Language icon | RailOne logo | Notification bell with badge "2"
             item {
                 Row(
                     modifier = Modifier
@@ -171,7 +164,7 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Left: Language Switcher Circle
+                    // Left: Language/Calendar Switcher Circle
                     Box(
                         modifier = Modifier
                             .size(40.dp)
@@ -184,15 +177,28 @@ fun HomeScreen(
                             },
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "A / अ",
-                            color = RailOneBlue,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "A",
+                                color = RailOneBlue,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                lineHeight = 12.sp
+                            )
+                            Text(
+                                text = "३१",
+                                color = RailOneBlue,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                lineHeight = 11.sp
+                            )
+                        }
                     }
 
-                    // Center: Authentic RailOne Logo with signature orange dot
+                    // Center: Authentic RailOne Logo
                     RailOneLogo()
 
                     // Right: Notification Bell with Badge "2"
@@ -224,7 +230,7 @@ fun HomeScreen(
                 }
             }
 
-            // 2. User Greeting matching screenshot: "Hi, Kedar Mitesh Vyas!"
+            // 2. User Greeting: "Hi, Kedar Mitesh Vyas!"
             item {
                 Column(
                     modifier = Modifier
@@ -258,25 +264,19 @@ fun HomeScreen(
                     JourneyPlannerCard(
                         title = "Reserved",
                         type = JourneyCardType.RESERVED,
-                        onClick = {
-                            onNavigate(Screen.MyBookings.route)
-                        },
+                        onClick = { onNavigate(Screen.MyBookings.route) },
                         modifier = Modifier.weight(1f)
                     )
                     JourneyPlannerCard(
                         title = "Unreserved",
                         type = JourneyCardType.UNRESERVED,
-                        onClick = {
-                            onNavigate(Screen.UnreservedBooking.route)
-                        },
+                        onClick = { onNavigate(Screen.UnreservedBooking.route) },
                         modifier = Modifier.weight(1f)
                     )
                     JourneyPlannerCard(
                         title = "Platform",
                         type = JourneyCardType.PLATFORM,
-                        onClick = {
-                            onNavigate(Screen.PlatformBooking.route)
-                        },
+                        onClick = { onNavigate(Screen.PlatformBooking.route) },
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -321,7 +321,7 @@ fun HomeScreen(
                 }
             }
 
-            // 5. "Upcoming Journey" Section (Gradient Ticket Card with notch)
+            // 5. "Upcoming Journey" Section
             item {
                 Column(
                     modifier = Modifier
@@ -400,8 +400,7 @@ fun HomeScreen(
                     ) {
                         items(facts) { fact ->
                             Column(
-                                modifier = Modifier
-                                    .width(180.dp)
+                                modifier = Modifier.width(180.dp)
                             ) {
                                 if (fact.imageRes != null) {
                                     Card(
@@ -434,7 +433,7 @@ fun HomeScreen(
                 }
             }
 
-            // 7. "Follow Us On Social Media Platforms" Banner matching screenshot
+            // 7. "Follow Us On Social Media Platforms" Banner
             item {
                 Column(
                     modifier = Modifier
@@ -553,9 +552,9 @@ fun UpcomingTicketCard(
                 .padding(16.dp)
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                // Top row: Journey Date matching screenshot
+                // Top row: Journey Date (formatted like "Sun, 22 Nov 26")
                 Text(
-                    text = ticket.formattedBookingDateTime.substringBefore(","),
+                    text = ticket.formattedBookingDateShort,
                     color = Color.White.copy(alpha = 0.85f),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium

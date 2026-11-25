@@ -1,5 +1,6 @@
 package com.indianrailways.railone.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -67,7 +68,6 @@ import com.indianrailways.railone.data.model.UnreservedTicket
 import com.indianrailways.railone.data.repository.TicketRepository
 import com.indianrailways.railone.ui.components.DashedDivider
 import com.indianrailways.railone.ui.components.TicketCardShape
-import com.indianrailways.railone.ui.navigation.Screen
 import com.indianrailways.railone.ui.theme.RailOneActiveGreen
 import com.indianrailways.railone.ui.theme.RailOneActiveGreenBg
 import com.indianrailways.railone.ui.theme.RailOneBlue
@@ -96,7 +96,7 @@ fun MyBookingsScreen(
     onBookAgain: () -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(BookingTab.UPCOMING) }
-    var selectedFilterChip by remember { mutableStateOf("All") } // All | Unreserved | Reserved | Platform
+    var selectedFilterChip by remember { mutableStateOf("All") }
     var ticketToCancel by remember { mutableStateOf<UnreservedTicket?>(null) }
 
     val unreservedTickets by ticketRepository.unreservedTickets.collectAsState()
@@ -106,7 +106,7 @@ fun MyBookingsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    // 1. DYNAMIC FILTERING BY TAB (Upcoming/Active vs Completed vs Cancelled vs All)
+    // DYNAMIC FILTERING BY TAB
     val tabFilteredUnreserved = remember(unreservedTickets, selectedTab) {
         when (selectedTab) {
             BookingTab.UPCOMING -> unreservedTickets.filter { it.status == TicketStatus.ACTIVE }
@@ -134,7 +134,7 @@ fun MyBookingsScreen(
         }
     }
 
-    // 2. DYNAMIC FILTERING BY CHIP (All vs Unreserved vs Reserved vs Platform)
+    // DYNAMIC FILTERING BY CHIP
     val displayUnreserved = (selectedFilterChip == "All" || selectedFilterChip == "Unreserved")
     val displayReserved = (selectedFilterChip == "All" || selectedFilterChip == "Reserved")
     val displayPlatform = (selectedFilterChip == "All" || selectedFilterChip == "Platform")
@@ -152,7 +152,7 @@ fun MyBookingsScreen(
                 .fillMaxSize()
                 .background(RailOneSurface)
         ) {
-            // 1. Top Header Bar
+            // Top Header Bar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -198,7 +198,7 @@ fun MyBookingsScreen(
                 }
             }
 
-            // 2. Dynamic Subheader: "Upcoming (N)" / "Completed (N)" in orange + refresh icon
+            // Subheader with count
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -231,7 +231,7 @@ fun MyBookingsScreen(
                 }
             }
 
-            // 3. Filter Chips: All | Unreserved | Reserved | Platform
+            // Filter Chips
             LazyRow(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -258,16 +258,15 @@ fun MyBookingsScreen(
                             containerColor = Color(0xFFF1F3F6),
                             labelColor = TextPrimary
                         ),
-                        border = FilterChipDefaults.filterChipBorder(
-                            enabled = true,
-                            selected = isSelected,
-                            borderColor = if (isSelected) RailOneBlue else Color.Transparent
+                        border = BorderStroke(
+                            width = 1.dp,
+                            color = if (isSelected) RailOneBlue else Color.Transparent
                         )
                     )
                 }
             }
 
-            // 4. Ticket List (or Authentic Empty State)
+            // Ticket List (or Empty State)
             if (isEmpty) {
                 Box(
                     modifier = Modifier
@@ -335,7 +334,7 @@ fun MyBookingsScreen(
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    // Unreserved Tickets
+                    // Unreserved Tickets (only user-booked ones)
                     items(visibleUnreserved, key = { it.utsNumber }) { unreserved ->
                         UnreservedTicketCard(
                             ticket = unreserved,
@@ -345,7 +344,7 @@ fun MyBookingsScreen(
                         )
                     }
 
-                    // Reserved Tickets
+                    // Reserved Tickets (only user-booked ones)
                     items(visibleReserved, key = { it.pnr }) { reserved ->
                         ReservedTicketCard(
                             ticket = reserved,
@@ -360,7 +359,7 @@ fun MyBookingsScreen(
                 }
             }
 
-            // 5. Floating Bottom Pill Tabs: Upcoming | Completed | Cancelled | All
+            // Bottom Pill Tabs: Upcoming | Completed | Cancelled | All
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -412,7 +411,7 @@ fun MyBookingsScreen(
             }
         }
 
-        // Cancellation Confirmation Dialog
+        // Cancellation Dialog
         ticketToCancel?.let { ticket ->
             AlertDialog(
                 onDismissRequest = { ticketToCancel = null },
@@ -548,7 +547,7 @@ fun UnreservedTicketCard(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Class: ${ticket.travelClass} (${ticket.trainType.name})",
+                        text = "Class: ${ticket.travelClass} (${ticket.trainType.label})",
                         fontSize = 12.sp,
                         color = TextSecondary
                     )
@@ -561,7 +560,7 @@ fun UnreservedTicketCard(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Route: FROM ---------- distance ----------> TO
+                // Route: FROM → TO
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -612,13 +611,13 @@ fun UnreservedTicketCard(
                 }
             }
 
-            // Dashed Divider separating notches
+            // Dashed Divider
             DashedDivider(
                 color = Color(0xFFF9A825).copy(alpha = 0.5f),
                 modifier = Modifier.padding(horizontal = 14.dp)
             )
 
-            // Bottom Action Bar: Fare | Book Again | View Details | Cancel
+            // Bottom Action Bar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -686,13 +685,11 @@ fun ReservedTicketCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            // Main Content Area
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 14.dp)
             ) {
-                // Top Row: "Reserved" cyan badge | PNR in bold
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -721,7 +718,6 @@ fun ReservedTicketCard(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Train Number & Name | Journey Date
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -733,7 +729,6 @@ fun ReservedTicketCard(
                         color = TextPrimary,
                         lineHeight = 16.sp
                     )
-
                     Text(
                         text = "Journey Date\n${ticket.journeyDate}",
                         fontSize = 12.sp,
@@ -746,7 +741,6 @@ fun ReservedTicketCard(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Station route: JABALPUR ---------- 14h:15m ----------> BHARUCH JN.
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -758,13 +752,11 @@ fun ReservedTicketCard(
                         fontWeight = FontWeight.Bold,
                         color = TextPrimary
                     )
-
                     Text(
                         text = "— ${ticket.travelDuration} —",
                         fontSize = 11.sp,
                         color = TextMuted
                     )
-
                     Text(
                         text = ticket.destStation.name,
                         fontSize = 13.sp,
@@ -774,13 +766,11 @@ fun ReservedTicketCard(
                 }
             }
 
-            // Dashed Divider separating notches
             DashedDivider(
                 color = Color(0xFFF9A825).copy(alpha = 0.5f),
                 modifier = Modifier.padding(horizontal = 14.dp)
             )
 
-            // Bottom Action Bar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

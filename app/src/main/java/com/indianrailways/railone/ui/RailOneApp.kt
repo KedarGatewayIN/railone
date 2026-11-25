@@ -39,12 +39,13 @@ fun RailOneApp(ticketRepository: TicketRepository) {
     val currentRoute = navBackStackEntry?.destination?.route
 
     // Top-level destinations that show the bottom navigation bar
+    // Hide bottom bar on digital ticket screen (it goes landscape)
     val showBottomBar = currentRoute in listOf(
         Screen.Home.route,
         Screen.MyBookings.route,
         Screen.YouProfile.route,
         Screen.Menu.route
-    )
+    ) && currentRoute != Screen.DigitalTicket.route
 
     Scaffold(
         bottomBar = {

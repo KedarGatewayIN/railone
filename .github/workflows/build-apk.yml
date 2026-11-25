@@ -54,7 +54,38 @@ jobs:
           retention-days: 30
           if-no-files-found: error
 
-      - name: Create GitHub Release (on Tag Push)
+      - name: Delete Previous Latest Release
+        if: github.event_name == 'push'
+        run: |
+          gh release delete latest-build --yes --cleanup-tag 2>/dev/null || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub Release with APK
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest-build
+          name: "RailOne APK - Latest Build"
+          files: app/build/outputs/apk/debug/*.apk
+          draft: false
+          prerelease: false
+          body: |
+            ## 🚂 RailOne Android APK - Latest Build
+
+            **Download the APK file below** and install it directly on your Android device.
+
+            ### How to install:
+            1. Download the `.apk` file below
+            2. Transfer to your Android phone (or download directly on phone)
+            3. Enable "Install from unknown sources" if prompted
+            4. Tap the APK file to install
+
+            > Built automatically from commit ${{ github.sha }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Tagged Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:

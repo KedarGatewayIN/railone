@@ -36,14 +36,20 @@ data class UnreservedTicket(
     val bookingTimestamp: Long = System.currentTimeMillis(),
     val validityHours: Int = 3,
     val status: TicketStatus = TicketStatus.ACTIVE,
-    val irRegistrationCode: String = "IR:24AAGMO289C1ZP",
+    val irRegistrationCode: String = "IR:24AAAGM0289C1ZP",
     val passengerName: String = "Kedar Mitesh Vyas",
-    val passengerMobile: String = "9879988201",
+    val passengerMobile: String = "7227981091",
     val isPaperless: Boolean = true
 ) {
     val formattedBookingDateTime: String
         get() {
             val sdf = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.ENGLISH)
+            return sdf.format(Date(bookingTimestamp))
+        }
+
+    val formattedBookingDateShort: String
+        get() {
+            val sdf = SimpleDateFormat("EEE, dd MMM yy", Locale.ENGLISH)
             return sdf.format(Date(bookingTimestamp))
         }
 
